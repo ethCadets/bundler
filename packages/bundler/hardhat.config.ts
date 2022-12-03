@@ -1,7 +1,7 @@
 import '@nomiclabs/hardhat-ethers'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-deploy'
-
+require("dotenv").config();
 import fs from 'fs'
 
 import { HardhatUserConfig } from 'hardhat/config'
@@ -14,6 +14,14 @@ if (mnemonicFileName != null && fs.existsSync(mnemonicFileName)) {
 }
 
 const infuraUrl = (name: string): string => `https://${name}.infura.io/v3/${process.env.INFURA_ID}`
+
+function privateKey(): string {
+  const PRIVATE_KEY = process.env.PRIVATE_KEY;
+  if (typeof PRIVATE_KEY !== "string") {
+    throw new Error(`Private key for wallet is incorrect`)
+  }
+  return PRIVATE_KEY;
+}
 
 function getNetwork (url: string): NetworkUserConfig {
   return {
@@ -37,6 +45,12 @@ const config: HardhatUserConfig = {
     localhost: {
       url: 'http://localhost:8545/',
       saveDeployments: false
+    },
+    mumbai: {
+      url: infuraUrl('polygon-mumbai'),
+      accounts: [
+        privateKey(),
+      ],
     },
     goerli: getInfuraNetwork('goerli')
   },
