@@ -101,7 +101,7 @@ async function main (): Promise<void> {
   const program = new Command()
     .version(erc4337RuntimeVersion)
     .option('--network <string>', 'network name or url', 'http://localhost:8545')
-    .option('--mnemonic <file>', 'mnemonic/private-key file of signer account (to fund account)')
+    // .option('--mnemonic <file>', 'mnemonic/private-key file of signer account (to fund account)')
     .option('--bundlerUrl <url>', 'bundler URL', 'http://localhost:3000/rpc')
     .option('--entryPoint <string>', 'address of the supported EntryPoint contract', ENTRY_POINT)
     .option('--deployDeployer', 'Deploy the "account deployer" on this network (default for testnet)')
@@ -110,12 +110,11 @@ async function main (): Promise<void> {
 
   const opts = program.parse().opts()
   const provider = getDefaultProvider(opts.network) as JsonRpcProvider
-  let signer: Signer
+  let signer: Signer = provider.getSigner();
   const deployDeployer: boolean = opts.deployDeployer
   let bundler: BundlerServer | undefined
   if (opts.selfBundler != null) {
     // todo: if node is geth, we need to fund our bundler's account:
-    const signer = provider.getSigner()
 
     const signerBalance = await provider.getBalance(signer.getAddress())
     const account = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
@@ -135,23 +134,23 @@ async function main (): Promise<void> {
     bundler = await runBundler(argv)
     await bundler.asyncStart()
   }
-  if (opts.mnemonic != null) {
-    signer = Wallet.fromMnemonic(fs.readFileSync(opts.mnemonic, 'ascii').trim()).connect(provider)
-  } else {
-    try {
-      const accounts = await provider.listAccounts()
-      if (accounts.length === 0) {
-        console.log('fatal: no account. use --mnemonic (needed to fund account)')
-        process.exit(1)
-      }
-      // for hardhat/node, use account[0]
-      signer = provider.getSigner()
-      // deployDeployer = true
-    } catch (e) {
-      throw new Error('must specify --mnemonic')
-    }
-  }
-  const accountOwner = new Wallet('0x'.padEnd(66, '7'))
+  // if (opts.mnemonic != null) {
+  //   signer = Wallet.fromMnemonic(fs.readFileSync(opts.mnemonic, 'ascii').trim()).connect(provider)
+  // } else {
+  //   try {
+  //     const accounts = await provider.listAccounts()
+  //     if (accounts.length === 0) {
+  //       console.log('fatal: no account. use --mnemonic (needed to fund account)')
+  //       process.exit(1)
+  //     }
+  //     // for hardhat/node, use account[0]
+  //     signer = provider.getSigner()
+  //     // deployDeployer = true
+  //   } catch (e) {
+  //     throw new Error('must specify --mnemonic')
+  //   }
+  // }
+  const accountOwner = new Wallet('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
 
   const index = Date.now()
   const client = await new Runner(provider, opts.bundlerUrl, accountOwner, opts.entryPoint, index).init(deployDeployer ? signer : undefined)

@@ -43,7 +43,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     localhost: {
-      url: 'http://localhost:8545/',
+      url: 'http://127.0.0.1:8545/',
       saveDeployments: false
     },
     mumbai: {

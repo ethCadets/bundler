@@ -124,7 +124,6 @@ export async function runBundler(argv: string[], overrideExit = true): Promise<B
   }
   
   let wallet: Wallet = new Wallet(PRIVATE_KEY, provider);
-  console.log(`Matic balance of connected wallet ${wallet.address} is ${await provider.getBalance(wallet.address)}`);
 
   const {
     entryPoint,
